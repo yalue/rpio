@@ -12,3 +12,7 @@ Go RPio implementation found at https://github.com/stianeikeland/go-rpio.
 Additionally, this will likely not support all of the python functions. I am
 focusing only on the ones I need for another project at the moment.
 
+At the moment, this project only adds the `rpio.go` file, which uses cgo to
+expose the RPio functions. The C and header files have only been modified in
+minor ways, mostly to remove any usage of `Python.h`.
+
