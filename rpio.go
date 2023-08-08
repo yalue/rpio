@@ -17,6 +17,10 @@ int GetGPIODirection(int gpio) {
 	return gpio_direction[gpio];
 }
 
+int SetGPIODirection(int gpio, int direction) {
+	gpio_direction[gpio] = direction;
+}
+
 void SetGPIOMode(int mode) {
 	gpio_mode = mode;
 }
@@ -78,6 +82,11 @@ func Setup() error {
 
 // May be called to clean up the GPIO functionality when it's no longer needed.
 func Cleanup() error {
+	// Used in py_gpio.c to reset all channels during cleanup.
+	for i := 0; i < 54; i++ {
+		C.setup_gpio(C.int(i), INPUT, PUD_OFF)
+		C.SetGPIODirection(C.int(i), -1)
+	}
 	C.cleanup()
 	return nil
 }
