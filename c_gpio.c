@@ -167,8 +167,8 @@ int setup(void)
     if ((gpio_mem = malloc(BLOCK_SIZE + (PAGE_SIZE-1))) == NULL)
         return SETUP_MALLOC_FAIL;
 
-    if ((uint32_t)gpio_mem % PAGE_SIZE)
-        gpio_mem += PAGE_SIZE - ((uint32_t)gpio_mem % PAGE_SIZE);
+    if ((uintptr_t) gpio_mem % PAGE_SIZE)
+        gpio_mem += PAGE_SIZE - ((uintptr_t) gpio_mem % PAGE_SIZE);
 
     if ((gpio_map = (uint32_t *)mmap( (void *)gpio_mem, BLOCK_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_FIXED, mem_fd, gpio_base)) == MAP_FAILED)
         return SETUP_MMAP_FAIL;

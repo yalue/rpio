@@ -10,7 +10,7 @@ import (
 #include "common.h"
 #include "cpuinfo.h"
 #include "event_gpio.h"
-#include "g_gpio.h"
+#include "c_gpio.h"
 #include "soft_pwm.h"
 
 int GetGPIODirection(int gpio) {
@@ -92,7 +92,7 @@ func CheckGPIOPriv() error {
 }
 
 func GetGPIONumber(channel uint8) (uint8, error) {
-	value := C.int(0)
+	value := C.uint(0)
 	result := C.get_gpio_number(C.int(channel), &value)
 	if result != 0 {
 		return 0, fmt.Errorf("get_gpio_number() failed with code %d", result)
@@ -139,7 +139,7 @@ func SetupChannel(channel, pullUpDown uint8, output bool) error {
 		return fmt.Errorf("Channel %d already in use", channel)
 	}
 	directionInt := C.GetGPIODirection(C.int(gpio))
-	if (f == 1) && (dir != -1) {
+	if (f == 1) && (directionInt != -1) {
 		return fmt.Errorf("Channel %d already in use", channel)
 	}
 	directionInt = C.int(INPUT)
@@ -179,7 +179,7 @@ func OutputGPIO(channel uint8, high bool) error {
 func InputGPIO(channel uint8) (bool, error) {
 	e := SetupOK()
 	if e != nil {
-		return e
+		return false, e
 	}
 	gpio, e := GetGPIONumber(channel)
 	if e != nil {
