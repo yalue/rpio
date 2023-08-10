@@ -80,6 +80,21 @@ func Setup() error {
 	return fmt.Errorf("Error setting up GPIO: setup() returned %d", result)
 }
 
+// Cleans up GPIO activity on the given channel.
+func CleanupChannel(channel uint8) error {
+	e := SetupOK()
+	if e != nil {
+		return e
+	}
+	gpio, e := GetGPIONumber(channel)
+	if e != nil {
+		return fmt.Errorf("Bad channel number (%d): %w", channel, e)
+	}
+	C.setup_gpio(C.int(gpio), INPUT, PUD_OFF)
+	C.SetGPIODirection(C.int(gpio), -1)
+	return nil
+}
+
 // May be called to clean up the GPIO functionality when it's no longer needed.
 func Cleanup() error {
 	// Used in py_gpio.c to reset all channels during cleanup.
@@ -295,7 +310,7 @@ func (p *PWMObject) Start(dutyCycle float32) error {
 }
 
 // As with PWMObject.Start, the dutyCycle here must be a percentage.
-func (p *PWMObject) ChangleDutyCycle(dutyCycle float32) error {
+func (p *PWMObject) ChangeDutyCycle(dutyCycle float32) error {
 	if (dutyCycle < 0.0) || (dutyCycle > 100.0) {
 		return fmt.Errorf("Duty cycle must be between 0 and 100. Got %f",
 			dutyCycle)
