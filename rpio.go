@@ -58,8 +58,14 @@ func SetupOK() error {
 }
 
 // Must be called prior to using any other GPIO functionality. Returns an error
-// if one occurs.
+// if one occurs. Returns nil if Setup has already been completed.
 func Setup() error {
+	if setupOK {
+		return nil
+	}
+	for i := 0; i < 54; i++ {
+		C.SetGPIODirection(C.int(i), -1)
+	}
 	result := C.setup()
 	if result == C.SETUP_OK {
 		setupOK = true
@@ -90,19 +96,30 @@ func CleanupChannel(channel uint8) error {
 	if e != nil {
 		return fmt.Errorf("Bad channel number (%d): %w", channel, e)
 	}
+	if C.GetGPIODirection(C.int(gpio)) == -1 {
+		return nil
+	}
 	C.setup_gpio(C.int(gpio), INPUT, PUD_OFF)
 	C.SetGPIODirection(C.int(gpio), -1)
 	return nil
 }
 
 // May be called to clean up the GPIO functionality when it's no longer needed.
+// Returns an error if Setup() hasn't been called yet.
 func Cleanup() error {
+	if !setupOK {
+		return fmt.Errorf("The library isn't set up")
+	}
 	// Used in py_gpio.c to reset all channels during cleanup.
 	for i := 0; i < 54; i++ {
+		if C.GetGPIODirection(C.int(i)) == -1 {
+			continue
+		}
 		C.setup_gpio(C.int(i), INPUT, PUD_OFF)
 		C.SetGPIODirection(C.int(i), -1)
 	}
 	C.cleanup()
+	setupOK = false
 	return nil
 }
 
