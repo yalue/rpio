@@ -189,6 +189,7 @@ func SetupChannel(channel, pullUpDown uint8, output bool) error {
 		pullUpDown = PUD_OFF
 	}
 	C.setup_gpio(C.int(gpio), directionInt, C.int(pullUpDown))
+	C.SetGPIODirection(C.int(gpio), directionInt)
 	return nil
 }
 
