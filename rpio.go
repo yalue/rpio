@@ -204,8 +204,10 @@ func OutputGPIO(channel uint8, high bool) error {
 	if e != nil {
 		return fmt.Errorf("Bad channel (%d): %w", channel, e)
 	}
-	if C.GetGPIODirection(C.int(gpio)) != OUTPUT {
-		return fmt.Errorf("Channel %d isn't set as an output", channel)
+	direction := C.GetGPIODirection(C.int(gpio))
+	if direction != OUTPUT {
+		return fmt.Errorf("Channel %d isn't an output. (got %d, need %d)",
+			channel, direction, OUTPUT)
 	}
 	value := C.int(0)
 	if high {
